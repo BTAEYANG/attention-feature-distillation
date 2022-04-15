@@ -71,6 +71,8 @@ def train_kl(module_list, optimizer, criterion, train_loader, device, args):
 
     criterion_ce, criterion_kl, criterion_kd = criterion
 
+    fpd = module_list[1]
+
     for batch_idx, (inputs, targets) in enumerate(train_loader):
         inputs, targets = inputs.to(device), targets.to(device)
         with torch.no_grad():
@@ -79,7 +81,7 @@ def train_kl(module_list, optimizer, criterion, train_loader, device, args):
             feat_t = [f.detach() for f in feat_t]
         feat_s, output_s = model_s(inputs, is_feat=True)
 
-        g_t, g_s, se_g_t, se_g_s = module_list[1](feat_t, feat_s)
+        g_t, g_s, se_g_t, se_g_s = fpd(feat_t, feat_s)
 
         loss_ce = criterion_ce(output_s, targets)
         loss_kl = criterion_kl(output_s, output_t)

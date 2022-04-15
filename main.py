@@ -20,7 +20,7 @@ def str2bool(s):
 def main():
     parser = argparse.ArgumentParser()
     # data
-    parser.add_argument('--data_dir', default='/home/lab265/lab265/datasets/CIFAR100')
+    parser.add_argument('--data_dir', default='/home/lab265/lab265/datasets/')
     parser.add_argument('--data', default='CIFAR100')
     parser.add_argument('--trained_dir', default='trained/wrn40x2/model.pth')
 

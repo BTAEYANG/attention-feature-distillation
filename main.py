@@ -82,10 +82,10 @@ def main():
     args.t_shapes = [feat_t[i].size() for i in args.guide_layers]
 
     for index, s_shape in enumerate(args.s_shapes):
-        print(f"s_shape.size():{s_shape.size()}")
+        print(f"s_shape.size():{s_shape}")
 
     for index, t_shape in enumerate(args.t_shapes):
-        print(f"t_shape.size():{t_shape.size()}")
+        print(f"t_shape.size():{t_shape}")
 
     # teacher net same size feature map 去重, 得到 teacher feature map number 和 不重复的 shape
     args.n_t, args.unique_t_shapes = unique_shape(args.t_shapes)

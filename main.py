@@ -74,9 +74,21 @@ def main():
     trainable_list = nn.ModuleList([])
     trainable_list.append(model_s)
 
+    for i, f in enumerate(feat_s):
+        print(f"f[{i}]:{f.size()};\n"
+              f" f.mean(3).mean(2).size():{f.mean(3).mean(2).size()};\n"
+              f"f.pow(2).mean(1).size():{f.pow(2).mean(1).size()}\n;"
+              f"f.pow(2).mean(1).view(1, -1):{f.pow(2).mean(1).view(1, -1).size()}\n")
+
     # 初始化随机生成教师各层和学生各层的feature的形状，存入的是每层的shape [[1, 32, 32, 32],[1, 64, 32, 32],[1, 128, 16, 16]]
     args.s_shapes = [feat_s[i].size() for i in args.hint_layers]
     args.t_shapes = [feat_t[i].size() for i in args.guide_layers]
+
+    for index, s_shape in enumerate(args.s_shapes):
+        print(f"s_shape.size():{s_shape.size()}")
+
+    for index, t_shape in enumerate(args.t_shapes):
+        print(f"t_shape.size():{t_shape.size()}")
 
     # teacher net same size feature map 去重, 得到 teacher feature map number 和 不重复的 shape
     args.n_t, args.unique_t_shapes = unique_shape(args.t_shapes)

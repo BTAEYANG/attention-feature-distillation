@@ -84,11 +84,16 @@ def main():
     for index, s_shape in enumerate(args.s_shapes):
         print(f"s_shape.size():{s_shape}")
 
+    print("\n")
+
     for index, t_shape in enumerate(args.t_shapes):
         print(f"t_shape.size():{t_shape}")
 
     # teacher net same size feature map 去重, 得到 teacher feature map number 和 不重复的 shape
     args.n_t, args.unique_t_shapes = unique_shape(args.t_shapes)
+
+    for index, unique_t_shape in enumerate(args.unique_t_shapes):
+        print(f"unique_t_shape.size():{unique_t_shape}")
 
     criterion_ce = nn.CrossEntropyLoss()
     criterion_kl = DistillKL(args.temperature)

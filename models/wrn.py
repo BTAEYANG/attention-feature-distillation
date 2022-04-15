@@ -167,3 +167,15 @@ def wrn16x2(**kwargs):
 def wrn16x1(**kwargs):
     model = WideResNet(depth=16, widen_factor=1, **kwargs)
     return model
+
+
+if __name__ == '__main__':
+
+    x = torch.randn(1, 3, 32, 32)
+    net = wrn16x2(num_classes=100)
+    print(net)
+    feats, logit = net(x, is_feat=True)
+    for i, f in enumerate(feats):
+        print(f"f[{i}]:{f.size()};\n")
+    print()
+    print(logit.size())

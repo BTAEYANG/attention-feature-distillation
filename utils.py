@@ -55,7 +55,6 @@ def train(model, optimizer, criterion, train_loader, device):
 
 
 def train_kl(module_list, optimizer, criterion, train_loader, device, args):
-
     for module in module_list:
         # model_s AFD train
         module.train()
@@ -80,9 +79,14 @@ def train_kl(module_list, optimizer, criterion, train_loader, device, args):
             feat_t = [f.detach() for f in feat_t]
         feat_s, output_s = model_s(inputs, is_feat=True)
 
+        g_t, g_s, se_g_t, se_g_s = module_list[1](feat_t, feat_s)
+
         loss_ce = criterion_ce(output_s, targets)
         loss_kl = criterion_kl(output_s, output_t)
-        loss_kd = criterion_kd(feat_s, feat_t)
+
+        loss_kd_1 = criterion_kd(g_s, g_t)
+        loss_kd_2 = criterion_kd(se_g_s, se_g_t)
+        loss_kd = 0.3 * loss_kd_1 + 0.7 * loss_kd_2
 
         loss = loss_ce + args.alpha * loss_kl + args.beta * loss_kd
 

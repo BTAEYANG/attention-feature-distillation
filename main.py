@@ -2,6 +2,8 @@
 # Original Source : https://github.com/HobbitLong/RepDistiller
 
 import argparse
+
+from distill.FPD import FPD
 from utils import *
 from dataset import *
 from distill import *
@@ -74,30 +76,20 @@ def main():
     trainable_list = nn.ModuleList([])
     trainable_list.append(model_s)
 
-    for i, f in enumerate(feat_s):
-        print(f"f[{i}]:{f.size()};\n")
-
     # 初始化随机生成教师各层和学生各层的feature的形状，存入的是每层的shape [[1, 32, 32, 32],[1, 64, 32, 32],[1, 128, 16, 16]]
     args.s_shapes = [feat_s[i].size() for i in args.hint_layers]
     args.t_shapes = [feat_t[i].size() for i in args.guide_layers]
 
-    for index, s_shape in enumerate(args.s_shapes):
-        print(f"s_shape.size():{s_shape}")
-
-    print("\n")
-
-    for index, t_shape in enumerate(args.t_shapes):
-        print(f"t_shape.size():{t_shape}")
-
     # teacher net same size feature map 去重, 得到 teacher feature map number 和 不重复的 shape
     args.n_t, args.unique_t_shapes = unique_shape(args.t_shapes)
-
-    for index, unique_t_shape in enumerate(args.unique_t_shapes):
-        print(f"unique_t_shape.size():{unique_t_shape}")
 
     criterion_ce = nn.CrossEntropyLoss()
     criterion_kl = DistillKL(args.temperature)
     criterion_kd = AFD(args)
+
+    fpd = FPD()
+    module_list.append(fpd)
+    trainable_list.append(fpd)
 
     # add AFD to trainable
     module_list.append(criterion_kd)
@@ -108,7 +100,8 @@ def main():
     criterion.append(criterion_kl)
     criterion.append(criterion_kd)
 
-    optimizer = optim.SGD(trainable_list.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
+    optimizer = optim.SGD(trainable_list.parameters(), lr=args.lr, momentum=args.momentum,
+                          weight_decay=args.weight_decay)
 
     # add model_t
     module_list.append(model_t)
@@ -125,7 +118,7 @@ def main():
         test_acc1, test_acc5 = test(model_s, test_loader, device)
         print(
             'Epoch: {0:>3d} |Train Loss: {1:>2.4f} |Train Top1: {2:.4f} |Train Top5: {3:.4f} |Test Top1: {4:.4f} |Test Top5: {5:.4f}| Time: {6:>5.1f} (s)'
-            .format(epoch, train_loss, train_acc1, train_acc5, test_acc1, test_acc5, time() - s))
+                .format(epoch, train_loss, train_acc1, train_acc5, test_acc1, test_acc5, time() - s))
 
 
 if __name__ == '__main__':

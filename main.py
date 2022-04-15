@@ -75,10 +75,7 @@ def main():
     trainable_list.append(model_s)
 
     for i, f in enumerate(feat_s):
-        print(f"f[{i}]:{f.size()};\n"
-              f" f.mean(3).mean(2).size():{f.mean(3).mean(2).size()};\n"
-              f"f.pow(2).mean(1).size():{f.pow(2).mean(1).size()}\n;"
-              f"f.pow(2).mean(1).view(1, -1):{f.pow(2).mean(1).view(2, -1).size()}\n")
+        print(f"f[{i}]:{f.size()};\n")
 
     # 初始化随机生成教师各层和学生各层的feature的形状，存入的是每层的shape [[1, 32, 32, 32],[1, 64, 32, 32],[1, 128, 16, 16]]
     args.s_shapes = [feat_s[i].size() for i in args.hint_layers]

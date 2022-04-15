@@ -5,7 +5,6 @@ from models.torch_util import load_state_dict_from_url
 import torch
 import torch.nn as nn
 
-
 model_urls = {
     'resnet18im': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
     'resnet34im': 'https://download.pytorch.org/models/resnet34-333f7ec4.pth',
@@ -13,6 +12,7 @@ model_urls = {
     'resnet101im': 'https://download.pytorch.org/models/resnet101-5d3b4d8f.pth',
     'resnet152im': 'https://download.pytorch.org/models/resnet152-b121ed2d.pth',
 }
+
 
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     """3x3 convolution with padding"""
@@ -264,6 +264,7 @@ def resnet50im(pretrained=False, progress=True, **kwargs):
     return _resnet('resnet50im', Bottleneck, [3, 4, 6, 3], pretrained, progress,
                    **kwargs)
 
+
 def resnet101im(pretrained=False, progress=True, **kwargs):
     r"""ResNet-50 model from
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
@@ -274,6 +275,7 @@ def resnet101im(pretrained=False, progress=True, **kwargs):
     """
     return _resnet('resnet101im', Bottleneck, [3, 4, 23, 3], pretrained, progress,
                    **kwargs)
+
 
 if __name__ == '__main__':
     res = resnet18im(pretrained=True)

@@ -10,6 +10,7 @@ import torch.optim as optim
 import torch.backends.cudnn as cudnn
 from time import time
 
+
 def str2bool(s):
     if s not in {'F', 'T'}:
         raise ValueError('Not a valid boolean string')
@@ -41,20 +42,25 @@ def main():
     parser.add_argument('--qk_dim', default=128, type=int)
 
     args = parser.parse_args()
+
+    # 根据相应的model取对应的层数
     args.guide_layers = LAYER[args.model_t]
     args.hint_layers = LAYER[args.model]
 
     for param in sorted(vars(args).keys()):
         print('--{0} {1}'.format(param, vars(args)[param]))
 
-    train_loader, test_loader, args.num_classes, args.image_size = create_loader(args.batch_size, args.data_dir, args.data)
+    train_loader, test_loader, args.num_classes, args.image_size = create_loader(args.batch_size, args.data_dir,
+                                                                                 args.data)
 
     model_t = models.__dict__[args.model_t](num_classes=args.num_classes)
     model_t.load_state_dict(torch.load(args.trained_dir))
     model_s = models.__dict__[args.model](num_classes=args.num_classes)
     device = torch.device('cuda')
 
+    # 随机生成2个CIFAR数据集一样大小的噪声image
     data = torch.randn(2, 3, args.image_size, args.image_size)
+
     model_t.eval()
     model_s.eval()
     with torch.no_grad():
@@ -62,17 +68,24 @@ def main():
         feat_s, _ = model_s(data, is_feat=True)
 
     module_list = nn.ModuleList([])
+    # add model_s
     module_list.append(model_s)
+
     trainable_list = nn.ModuleList([])
     trainable_list.append(model_s)
 
+    # 初始化随机生成教师各层和学生各层的feature的形状，存入的是每层的shape [[1, 32, 32, 32],[1, 64, 32, 32],[1, 128, 16, 16]]
     args.s_shapes = [feat_s[i].size() for i in args.hint_layers]
     args.t_shapes = [feat_t[i].size() for i in args.guide_layers]
+
+    # teacher net same size feature map 去重, 得到 teacher feature map number 和 不重复的 shape
     args.n_t, args.unique_t_shapes = unique_shape(args.t_shapes)
 
     criterion_ce = nn.CrossEntropyLoss()
     criterion_kl = DistillKL(args.temperature)
     criterion_kd = AFD(args)
+
+    # add AFD to trainable
     module_list.append(criterion_kd)
     trainable_list.append(criterion_kd)
 
@@ -83,6 +96,7 @@ def main():
 
     optimizer = optim.SGD(trainable_list.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
 
+    # add model_t
     module_list.append(model_t)
 
     module_list.cuda()
@@ -95,8 +109,9 @@ def main():
 
         train_loss, train_acc1, train_acc5 = train_kl(module_list, optimizer, criterion, train_loader, device, args)
         test_acc1, test_acc5 = test(model_s, test_loader, device)
-        print('Epoch: {0:>3d} |Train Loss: {1:>2.4f} |Train Top1: {2:.4f} |Train Top5: {3:.4f} |Test Top1: {4:.4f} |Test Top5: {5:.4f}| Time: {6:>5.1f} (s)'
-              .format(epoch, train_loss, train_acc1, train_acc5, test_acc1, test_acc5, time() - s))
+        print(
+            'Epoch: {0:>3d} |Train Loss: {1:>2.4f} |Train Top1: {2:.4f} |Train Top5: {3:.4f} |Test Top1: {4:.4f} |Test Top5: {5:.4f}| Time: {6:>5.1f} (s)'
+            .format(epoch, train_loss, train_acc1, train_acc5, test_acc1, test_acc5, time() - s))
 
 
 if __name__ == '__main__':

@@ -55,8 +55,12 @@ def train(model, optimizer, criterion, train_loader, device):
 
 
 def train_kl(module_list, optimizer, criterion, train_loader, device, args):
+
     for module in module_list:
+        # model_s AFD train
         module.train()
+
+    # model_t eval()
     module_list[-1].eval()
 
     model_s = module_list[0]
@@ -67,10 +71,12 @@ def train_kl(module_list, optimizer, criterion, train_loader, device, args):
     top5 = AverageMeter()
 
     criterion_ce, criterion_kl, criterion_kd = criterion
+
     for batch_idx, (inputs, targets) in enumerate(train_loader):
         inputs, targets = inputs.to(device), targets.to(device)
         with torch.no_grad():
             feat_t, output_t = model_t(inputs, is_feat=True)
+            # 返回一个新的tensor，从当前计算图中分离下来的，但是仍指向原变量的存放位置,不同之处只是requires_grad为false，得到的这个tensor永远不需要计算其梯度，不具有grad
             feat_t = [f.detach() for f in feat_t]
         feat_s, output_s = model_s(inputs, is_feat=True)
 

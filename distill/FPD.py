@@ -20,7 +20,7 @@ class FPD(nn.Module):
         self.smooth = nn.Conv2d(256, 256, 3, 1, 1)
 
         # reduction = 16
-        self.se = SELayer(256, 16)
+        self.se = SELayer.SELayer(256, 16)
 
     @staticmethod
     def _upSample_add(x, y):

@@ -87,7 +87,7 @@ def main():
     criterion_kl = DistillKL(args.temperature)
     criterion_kd = AFD(args)
 
-    fpd = FPD()
+    fpd = FPD.FPD()
     module_list.append(fpd)
     trainable_list.append(fpd)
 
